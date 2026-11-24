@@ -1,0 +1,738 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c14bf145-bdb2-41ee-a785-87e27d88c743",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://openlibrary.org/search.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "fantasy"
+            },
+            {
+              "name": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "student-lab3-nocode/1.0"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "limitPagesFetched": true,
+              "maxRequests": 3,
+              "requestInterval": 1500
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "c9e5dcea-b802-4cad-9aab-04bc837ac0af",
+      "name": "HTTP Request",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f9490739-1796-4c73-b62d-d5ce3cd93441",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "1ecc498f-91bc-4e05-a927-d0eed4b64bb8",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        660,
+        100
+      ],
+      "id": "2a979156-6373-4b14-b5ea-1859cfa42190",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.docs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -100
+      ],
+      "id": "e32db6c2-daa4-4774-928c-b98dde343bdb",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9f0c9a63-1eff-43ff-9515-beb041049818",
+              "name": "author_link",
+              "value": "=https://openlibrary.org/{{ $json.author_key }}.json",
+              "type": "string"
+            },
+            {
+              "id": "1c3333c2-b67e-44f6-8fdf-3b6b925aef3c",
+              "name": "first_publish_year",
+              "value": "={{ $json.first_publish_year }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -100
+      ],
+      "id": "486d93fb-fcc0-4e5e-830e-090af31d2740",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -100
+      ],
+      "id": "490ba7a2-276f-4f2e-9af8-12c50592b4ed",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\Users\\Windows\\Desktop\\Инструменты автоматизированного сбора данных в сети Интернет\\lab5\\nocode\\nocode_result.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        -100
+      ],
+      "id": "cebd177f-3d9d-4643-a267-165b1b2e9631",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [1,2,3].map(page => ({json:{url: page === 1 ? 'https://quotes.toscrape.com/' : `https://quotes.toscrape.com/page/${page}/`}}));"
+      },
+      "id": "340fe076-f987-4bef-8248-684380cd09c5",
+      "name": "Create page URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ec866d76-a745-4d1f-852b-fbb8e4c6d0c6",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1540,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "5c7e8adf-2334-43ef-87e6-ffcf12226349",
+      "name": "HTTP Request - listing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        -320
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "quoteTexts",
+              "cssSelector": "div.quote span.text",
+              "returnArray": true
+            },
+            {
+              "key": "authors",
+              "cssSelector": "div.quote small.author",
+              "returnArray": true
+            },
+            {
+              "key": "authorLinks",
+              "cssSelector": "div.quote span a[href*='/author/']",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            },
+            {
+              "key": "tagGroups",
+              "cssSelector": "div.quote",
+              "returnValue": "html",
+              "returnArray": true
+            },
+            {
+              "key": "nextLink",
+              "cssSelector": "li.next a",
+              "returnValue": "attribute",
+              "attribute": "href"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebfb84ae-09cd-4f0d-b30e-c997e842a413",
+      "name": "HTML Extract - list",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const root = $('HTML Extract - list').first().json;\nconst baseUrl = 'https://quotes.toscrape.com';\n\nconst rows = (root.quoteTexts || []).map((quote, i) => {\n  const authorLink = String((root.authorLinks || [])[i] || '').trim();\n\n  return {\n    quote: String(quote || '').trim(),\n    author: String((root.authors || [])[i] || '').trim(),\n    authorUrl: authorLink.startsWith('http')\n      ? authorLink\n      : baseUrl + (authorLink.startsWith('/') ? authorLink : '/' + authorLink),\n    sourceUrl: baseUrl + '/',\n    tags: []\n  };\n});\n\nreturn rows.map(row => ({ json: row }));"
+      },
+      "id": "23752a01-5bcf-41f8-b41b-7ea2506d1a31",
+      "name": "Build quote items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4f70f163-fa14-45ea-8b17-13ee60e70263",
+      "name": "Loop quote items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.authorUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "0cc324d2-00a5-4aac-aeca-b232f20d1c75",
+      "name": "HTTP Request - author",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2860,
+        -320
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "birthDate",
+              "cssSelector": ".author-born-date"
+            },
+            {
+              "key": "birthLocation",
+              "cssSelector": ".author-born-location"
+            },
+            {
+              "key": "bio",
+              "cssSelector": ".author-description"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "54a3a323-d33c-4a4a-8dc2-c7c1261c683a",
+      "name": "HTML Extract - author",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        3080,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "eb12117c-3156-4b40-a759-f612c624199f",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3300,
+        -320
+      ],
+      "webhookId": "b8dda27e-b19c-4220-a445-e55f68d3a157"
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $('Build quote items').item.json;\nconst a = $json;\nreturn [{json:{quote:q.quote,author:q.author,tags:q.tags,author_birth_date:a.birthDate || null,author_birth_location:a.birthLocation || null,author_bio:a.bio || null,author_url:q.authorUrl,source_url:q.sourceUrl}}];"
+      },
+      "id": "fc858d57-81cf-4270-80de-079d5ee47228",
+      "name": "Set normalized fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3520,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "quote",
+        "options": {}
+      },
+      "id": "c81c8479-87a6-409a-93eb-0a9a65de3439",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        3740,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  json: {\n    fields: Object.keys(item.json),\n    data: item.json\n  }\n}));"
+      },
+      "id": "b9685838-fc6c-4093-bad7-cd7670b7f006",
+      "name": "Deduplicate business key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3960,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "86050163-606c-4c69-a740-f9bc7607c89f",
+      "name": "Schedule Trigger1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "quoteTexts",
+        "options": {
+          "destinationFieldName": "quote"
+        }
+      },
+      "id": "ec2a5ae7-3c4b-48da-9cca-aaf5ca8c614f",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "fileName": "quotes.json"
+        }
+      },
+      "id": "b1631d76-9ac4-43dc-ad37-b37064e1aaac",
+      "name": "Convert to File1",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4180,
+        -320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create page URLs": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - listing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - listing": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract - list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract - list": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build quote items": {
+      "main": [
+        [
+          {
+            "node": "Loop quote items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop quote items": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request - author",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop quote items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request - author": {
+      "main": [
+        [
+          {
+            "node": "HTML Extract - author",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Extract - author": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Set normalized fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set normalized fields": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate business key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate business key": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Create page URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Build quote items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6b9b3fae-ad7f-4c9a-90a6-c9470e8917f9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b60b44eabb8f6d34540eaaa34109e2fb4ff1bbd628dd69289f02de7a7ed14608"
+  },
+  "id": "1fakbALZV3ad6mt8",
+  "tags": []
+}
